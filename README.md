@@ -1,6 +1,14 @@
 # kotresult
 
-A Python implementation of the Result monad pattern, inspired by Kotlin's Result class. This library provides a way to handle operations that might succeed or fail without using exceptions for control flow.
+[![image](https://img.shields.io/pypi/v/kotresult.svg)](https://pypi.org/project/kotresult/)
+[![image](https://img.shields.io/pypi/l/kotresult.svg)](https://pypi.org/project/kotresult/)
+[![image](https://img.shields.io/pypi/pyversions/kotresult.svg)](https://pypi.org/project/kotresult/)
+[![image](https://img.shields.io/github/contributors/lalcs/kotresult.svg)](https://github.com/lalcs/kotresult/graphs/contributors)
+[![image](https://img.shields.io/pypi/dm/kotresult)](https://pypistats.org/packages/kotresult)
+![Unittest](https://github.com/Lalcs/kotresult/workflows/Unittest/badge.svg)
+
+A Python implementation of the Result monad pattern, inspired by Kotlin's Result class. This library provides a way to
+handle operations that might succeed or fail without using exceptions for control flow.
 
 ## Installation
 
@@ -14,7 +22,8 @@ pip install kotresult
 
 ### Result Class
 
-The `Result` class represents an operation that might succeed or fail. It can contain either a successful value or an exception.
+The `Result` class represents an operation that might succeed or fail. It can contain either a successful value or an
+exception.
 
 ```python
 from kotresult import Result
@@ -53,30 +62,37 @@ except ValueError as e:
 
 ### run_catching Function
 
-The `run_catching` function executes a function and returns a `Result` object containing either the return value or any exception that was raised.
+The `run_catching` function executes a function and returns a `Result` object containing either the return value or any
+exception that was raised.
 
 ```python
 from kotresult import run_catching
+
 
 # With a function that succeeds
 def add(a, b):
     return a + b
 
+
 result = run_catching(add, 2, 3)
 print(result.is_success)  # True
 print(result.get_or_none())  # 5
+
 
 # With a function that fails
 def divide(a, b):
     return a / b
 
+
 result = run_catching(divide, 1, 0)  # ZeroDivisionError
 print(result.is_failure)  # True
 print(type(result.exception_or_none()))  # <class 'ZeroDivisionError'>
 
+
 # With keyword arguments
 def greet(name, greeting="Hello"):
     return f"{greeting}, {name}!"
+
 
 result = run_catching(greet, name="World", greeting="Hi")
 print(result.get_or_none())  # "Hi, World!"
