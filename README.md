@@ -141,6 +141,17 @@ print(result.get_or_default(0))  # 42
 
 result = double_parsed_int("not_a_number")
 print(result.get_or_default(0))  # 0
+
+# Using on_success and on_failure for handling results
+def process_result(value: str):
+    parse_int(value).on_success(
+        lambda x: print(f"Successfully parsed {value} to {x}")
+    ).on_failure(
+        lambda e: print(f"Failed to parse {value}: {e}")
+    )
+
+process_result("42")  # Successfully parsed 42 to 42
+process_result("not_a_number")  # Failed to parse not_a_number: invalid literal for int() with base 10: 'not_a_number'
 ```
 
 ## API Reference
@@ -165,6 +176,8 @@ print(result.get_or_default(0))  # 0
 - `get_or_default(default_value)`: Returns the value if success, the default value if failure
 - `get_or_throw()`: Returns the value if success, throws the exception if failure
 - `throw_on_failure()`: Throws the exception if failure, does nothing if success
+- `on_success(callback)`: Executes the callback with the value if success, returns the Result object for chaining
+- `on_failure(callback)`: Executes the callback with the exception if failure, returns the Result object for chaining
 
 ### run_catching Function
 

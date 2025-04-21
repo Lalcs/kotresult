@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generic, TypeVar, Union
+from typing import Generic, TypeVar, Union, Callable
 
 T = TypeVar('T')
 R = TypeVar('R')
@@ -54,3 +54,13 @@ class Result(Generic[T]):
         if self.is_success:
             return self._value
         raise self._value
+
+    def on_success(self, callback: Callable[[T], None]) -> Result[T]:
+        if self.is_success:
+            callback(self._value)
+        return self
+
+    def on_failure(self, callback: Callable[[BaseException], None]) -> Result[T]:
+        if self.is_failure:
+            callback(self._value)
+        return self
