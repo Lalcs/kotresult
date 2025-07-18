@@ -31,15 +31,24 @@ class Result(Generic[T]):
             return "Success({})".format(self._value)
         return "Failure({})".format(self._value)
 
-    def get_or_none(self) -> Union[T, None]:
+    def get_or_null(self) -> Union[T, None]:
         if self.is_success:
             return self._value
         return None
 
-    def exception_or_none(self) -> Union[BaseException, None]:
+    def exception_or_null(self) -> Union[BaseException, None]:
         if self.is_failure:
             return self._value
         return None
+
+    # Python naming convention aliases
+    def get_or_none(self) -> Union[T, None]:
+        """Alias for get_or_null() for Python naming convention"""
+        return self.get_or_null()
+
+    def exception_or_none(self) -> Union[BaseException, None]:
+        """Alias for exception_or_null() for Python naming convention"""
+        return self.exception_or_null()
 
     def throw_on_failure(self) -> None:
         if self.is_failure:
@@ -64,3 +73,70 @@ class Result(Generic[T]):
         if self.is_failure:
             callback(self._value)
         return self
+
+    def map(self, transform: Callable[[T], R]) -> Result[R]:
+        if self.is_success:
+            return Result.success(transform(self._value))
+        return Result.failure(self._value)
+
+    def map_catching(self, transform: Callable[[T], R]) -> Result[R]:
+        if self.is_success:
+            try:
+                return Result.success(transform(self._value))
+            except BaseException as e:
+                return Result.failure(e)
+        return Result.failure(self._value)
+
+    def recover(self, transform: Callable[[BaseException], T]) -> Result[T]:
+        if self.is_failure:
+            return Result.success(transform(self._value))
+        return self
+
+    def recover_catching(self, transform: Callable[[BaseException], T]) -> Result[T]:
+        if self.is_failure:
+            try:
+                return Result.success(transform(self._value))
+            except BaseException as e:
+                return Result.failure(e)
+        return self
+
+    def fold(self, on_success: Callable[[T], R], on_failure: Callable[[BaseException], R]) -> R:
+        if self.is_success:
+            return on_success(self._value)
+        return on_failure(self._value)
+
+    def get_or_else(self, on_failure: Callable[[BaseException], T]) -> T:
+        if self.is_success:
+            return self._value
+        return on_failure(self._value)
+
+    # Python special methods
+    def __str__(self) -> str:
+        """String representation of the Result"""
+        return self.to_string()
+
+    def __repr__(self) -> str:
+        """Detailed representation of the Result"""
+        if self.is_success:
+            return f"Result.success({repr(self._value)})"
+        return f"Result.failure({repr(self._value)})"
+
+    def __eq__(self, other) -> bool:
+        """Check equality between Results"""
+        if not isinstance(other, Result):
+            return False
+        if self.is_success and other.is_success:
+            return self._value == other._value
+        if self.is_failure and other.is_failure:
+            return type(self._value) == type(other._value) and str(self._value) == str(other._value)
+        return False
+
+    def __ne__(self, other) -> bool:
+        """Check inequality between Results"""
+        return not self.__eq__(other)
+
+    def __hash__(self) -> int:
+        """Hash the Result for use in sets and dicts"""
+        if self.is_success:
+            return hash(("success", self._value))
+        return hash(("failure", type(self._value).__name__, str(self._value)))
