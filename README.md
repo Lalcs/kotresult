@@ -154,6 +154,109 @@ process_result("42")  # Successfully parsed 42 to 42
 process_result("not_a_number")  # Failed to parse not_a_number: invalid literal for int() with base 10: 'not_a_number'
 ```
 
+### Advanced Methods
+
+#### Transforming Results with map and mapCatching
+
+```python
+from kotresult import Result, run_catching
+
+# map(): Transform success values
+result = Result.success(5)
+squared = result.map(lambda x: x ** 2)
+print(squared.get_or_none())  # 25
+
+# map() on failure returns the same failure
+failure = Result.failure(ValueError("error"))
+mapped = failure.map(lambda x: x * 2)
+print(mapped.is_failure)  # True
+
+# mapCatching(): Transform values and catch exceptions
+def risky_transform(x):
+    if x > 10:
+        raise ValueError("Too large")
+    return x * 2
+
+result1 = Result.success(5).map_catching(risky_transform)
+print(result1.get_or_none())  # 10
+
+result2 = Result.success(15).map_catching(risky_transform)
+print(result2.is_failure)  # True
+print(type(result2.exception_or_none()))  # <class 'ValueError'>
+```
+
+#### Recovering from Failures
+
+```python
+# recover(): Transform failures to successes
+failure = Result.failure(ValueError("error"))
+recovered = failure.recover(lambda e: "Default value")
+print(recovered.get_or_none())  # "Default value"
+
+# recover() on success returns the same success
+success = Result.success(42)
+recovered = success.recover(lambda e: 0)
+print(recovered.get_or_none())  # 42
+
+# recoverCatching(): Recover with exception handling
+def risky_recovery(e):
+    if "critical" in str(e):
+        raise RuntimeError("Cannot recover")
+    return "Recovered"
+
+result1 = Result.failure(ValueError("error")).recover_catching(risky_recovery)
+print(result1.get_or_none())  # "Recovered"
+
+result2 = Result.failure(ValueError("critical error")).recover_catching(risky_recovery)
+print(result2.is_failure)  # True
+print(type(result2.exception_or_none()))  # <class 'RuntimeError'>
+```
+
+#### Folding Results
+
+```python
+# fold(): Handle both success and failure cases with one call
+def handle_result(value: str) -> str:
+    return parse_int(value).fold(
+        on_success=lambda x: f"The number is {x}",
+        on_failure=lambda e: f"Invalid input: {e}"
+    )
+
+print(handle_result("42"))  # "The number is 42"
+print(handle_result("abc"))  # "Invalid input: invalid literal for int() with base 10: 'abc'"
+
+# getOrElse(): Get value or compute alternative from exception
+result = parse_int("not_a_number")
+value = result.get_or_else(lambda e: len(str(e)))
+print(value)  # Length of the error message
+```
+
+### Chaining Operations
+
+```python
+# Chain multiple transformations
+result = (
+    run_catching(int, "42")
+    .map(lambda x: x * 2)
+    .map(lambda x: x + 10)
+    .map_catching(lambda x: 100 / x)
+)
+print(result.get_or_none())  # 1.0526315789473684
+
+# Complex error handling chain
+def process_data(data: str) -> str:
+    return (
+        run_catching(int, data)
+        .map(lambda x: x * 2)
+        .recover_catching(lambda e: 0)  # Default to 0 on parse error
+        .map(lambda x: f"Result: {x}")
+        .get_or_else(lambda e: "Processing failed")
+    )
+
+print(process_data("21"))  # "Result: 42"
+print(process_data("abc"))  # "Result: 0"
+```
+
 ## API Reference
 
 ### Result Class
@@ -178,6 +281,12 @@ process_result("not_a_number")  # Failed to parse not_a_number: invalid literal 
 - `throw_on_failure()`: Throws the exception if failure, does nothing if success
 - `on_success(callback)`: Executes the callback with the value if success, returns the Result object for chaining
 - `on_failure(callback)`: Executes the callback with the exception if failure, returns the Result object for chaining
+- `map(transform)`: Transforms the success value with the given function, returns a new Result
+- `map_catching(transform)`: Like map(), but catches exceptions thrown by the transform function
+- `recover(transform)`: Transforms the failure exception to a success value, returns a new Result
+- `recover_catching(transform)`: Like recover(), but catches exceptions thrown by the transform function
+- `fold(on_success, on_failure)`: Applies the appropriate function based on success/failure and returns the result directly (not wrapped in Result)
+- `get_or_else(on_failure)`: Returns the success value or computes an alternative value from the exception
 
 ### run_catching Function
 
