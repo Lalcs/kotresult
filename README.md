@@ -257,6 +257,52 @@ print(process_data("21"))  # "Result: 42"
 print(process_data("abc"))  # "Result: 0"
 ```
 
+### run_catching_with Function
+
+The `run_catching_with` function executes a function with a receiver object as the first argument. This is similar to Kotlin's extension function version of runCatching.
+
+**Note**: In Kotlin, there are two versions of `runCatching`:
+1. Regular function: `runCatching { ... }`
+2. Extension function: `someObject.runCatching { ... }`
+
+Since Python doesn't have extension functions, we implement the extension function version as a separate function called `run_catching_with`, where the receiver object is explicitly passed as the first parameter.
+
+```python
+from kotresult import run_catching_with
+
+# Basic usage with string operations
+# Kotlin: "hello".runCatching { toUpperCase() }
+# Python equivalent:
+result = run_catching_with("hello", str.upper)
+print(result.get_or_null())  # "HELLO"
+
+# With a custom function
+def add_prefix(text, prefix):
+    return prefix + text
+
+result = run_catching_with("world", add_prefix, "Hello, ")
+print(result.get_or_null())  # "Hello, world"
+
+# With lambda functions
+result = run_catching_with(42, lambda x: x * 2)
+print(result.get_or_null())  # 84
+
+# Type conversion with error handling
+result = run_catching_with("123", int)
+print(result.get_or_null())  # 123
+
+result = run_catching_with("not a number", int)
+print(result.is_failure)  # True
+print(type(result.exception_or_null()))  # <class 'ValueError'>
+
+# Chaining operations with receiver
+def process_text(text):
+    return text.strip().lower().replace(" ", "_")
+
+result = run_catching_with("  Hello World  ", process_text)
+print(result.get_or_null())  # "hello_world"
+```
+
 ## API Reference
 
 ### Result Class
@@ -273,8 +319,10 @@ print(process_data("abc"))  # "Result: 0"
 
 #### Methods
 
-- `get_or_none()`: Returns the value if success, `None` if failure
-- `exception_or_none()`: Returns the exception if failure, `None` if success
+- `get_or_null()`: Returns the value if success, `None` if failure
+- `get_or_none()`: Alias for `get_or_null()` for Python naming convention
+- `exception_or_null()`: Returns the exception if failure, `None` if success
+- `exception_or_none()`: Alias for `exception_or_null()` for Python naming convention
 - `to_string()`: Returns a string representation of the result
 - `get_or_default(default_value)`: Returns the value if success, the default value if failure
 - `get_or_throw()`: Returns the value if success, throws the exception if failure
@@ -291,6 +339,10 @@ print(process_data("abc"))  # "Result: 0"
 ### run_catching Function
 
 - `run_catching(func, *args, **kwargs)`: Executes the function with the given arguments and returns a `Result` object
+
+### run_catching_with Function
+
+- `run_catching_with(receiver, func, *args, **kwargs)`: Executes the function with a receiver object as the first argument and returns a `Result` object
 
 ## License
 

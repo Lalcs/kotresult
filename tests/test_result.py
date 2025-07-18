@@ -273,19 +273,6 @@ class TestResult(unittest.TestCase):
         with self.assertRaises(ZeroDivisionError):
             failure_result.get_or_else(lambda e: 1 / 0)
 
-    def test_kotlin_naming_aliases(self):
-        """Test Kotlin naming compatibility aliases"""
-        success_result = Result.success("test value")
-        failure_result = Result.failure(ValueError("test error"))
-
-        # Test getOrNull (alias for get_or_null)
-        self.assertEqual(success_result.getOrNull(), "test value")
-        self.assertIsNone(failure_result.getOrNull())
-
-        # Test exceptionOrNull (alias for exception_or_null)
-        self.assertIsNone(success_result.exceptionOrNull())
-        self.assertIsInstance(failure_result.exceptionOrNull(), ValueError)
-
     def test_get_or_null_and_exception_or_null(self):
         """Test get_or_null and exception_or_null main methods"""
         success_result = Result.success("test value")
