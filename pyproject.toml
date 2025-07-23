@@ -53,6 +53,6 @@ format-jinja = """
     {%- if distance == 0 -%}
         {{ serialize_pep440(base, stage, revision) }}
     {%- else -%}
-        {{ env.get_datetime().strftime('%Y.%m.%d') }}
+        {{ now.strftime('%Y.%m.%d') }}
     {%- endif -%}
 """
