@@ -48,6 +48,11 @@ class TestResult(unittest.TestCase):
         with self.assertRaises(ValueError):
             failure_result.get_or_throw()
 
+        # Test that get_or_raise is an alias for get_or_throw
+        self.assertEqual(success_result.get_or_throw(), success_result.get_or_raise())
+        with self.assertRaises(ValueError):
+            failure_result.get_or_raise()
+
     def test_throw_on_failure(self):
         """Test the throw_on_failure method"""
         success_result = Result.success("test value")
@@ -59,6 +64,14 @@ class TestResult(unittest.TestCase):
         # Should raise the stored exception
         with self.assertRaises(ValueError):
             failure_result.throw_on_failure()
+
+        # Test that raise_on_failure is an alias for throw_on_failure
+        # Should not raise an exception for success
+        success_result.raise_on_failure()
+
+        # Should raise the stored exception for failure
+        with self.assertRaises(ValueError):
+            failure_result.raise_on_failure()
 
     def test_on_success(self):
         """Test the on_success method"""
@@ -242,13 +255,13 @@ class TestResult(unittest.TestCase):
         with self.assertRaises(ZeroDivisionError):
             success_result.fold(
                 on_success=lambda x: 1 / 0,
-                on_failure=lambda e: "error"
+                on_failure=lambda e: 0.0  # Same type as 1 / 0 would return (float)
             )
 
         # Fold with exception in onFailure lambda should throw
         with self.assertRaises(RuntimeError):
             failure_result.fold(
-                on_success=lambda x: "success",
+                on_success=lambda x: None,  # Same type as exec() returns (None)
                 on_failure=lambda e: exec("raise RuntimeError('fold error')")
             )
 

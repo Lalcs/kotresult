@@ -58,6 +58,20 @@ try:
     failure.throw_on_failure()  # Raises ValueError("Something went wrong")
 except ValueError as e:
     print(f"Caught exception: {e}")
+
+# Python naming convention aliases
+# get_or_raise() is an alias for get_or_throw()
+try:
+    value = failure.get_or_raise()  # More Pythonic name
+except ValueError as e:
+    print(f"Caught exception: {e}")
+
+# raise_on_failure() is an alias for throw_on_failure()
+success.raise_on_failure()  # Does nothing
+try:
+    failure.raise_on_failure()  # More Pythonic name
+except ValueError as e:
+    print(f"Caught exception: {e}")
 ```
 
 ### run_catching Function
@@ -326,7 +340,9 @@ print(result.get_or_null())  # "hello_world"
 - `to_string()`: Returns a string representation of the result
 - `get_or_default(default_value)`: Returns the value if success, the default value if failure
 - `get_or_throw()`: Returns the value if success, throws the exception if failure
+- `get_or_raise()`: Alias for `get_or_throw()` for Python naming convention
 - `throw_on_failure()`: Throws the exception if failure, does nothing if success
+- `raise_on_failure()`: Alias for `throw_on_failure()` for Python naming convention
 - `on_success(callback)`: Executes the callback with the value if success, returns the Result object for chaining
 - `on_failure(callback)`: Executes the callback with the exception if failure, returns the Result object for chaining
 - `map(transform)`: Transforms the success value with the given function, returns a new Result

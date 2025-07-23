@@ -54,6 +54,11 @@ class Result(Generic[T]):
         if self.is_failure:
             raise self._value
 
+    # Python naming convention alias
+    def raise_on_failure(self) -> None:
+        """Alias for throw_on_failure() for Python naming convention"""
+        return self.throw_on_failure()
+
     def get_or_default(self, default_value: R) -> Union[T, R]:
         if self.is_success:
             return self._value
@@ -63,6 +68,11 @@ class Result(Generic[T]):
         if self.is_success:
             return self._value
         raise self._value
+
+    # Python naming convention alias
+    def get_or_raise(self) -> T:
+        """Alias for get_or_throw() for Python naming convention"""
+        return self.get_or_throw()
 
     def on_success(self, callback: Callable[[T], None]) -> Result[T]:
         if self.is_success:
