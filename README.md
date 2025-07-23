@@ -1,4 +1,4 @@
-# kotresult
+# KotResult
 
 [![image](https://img.shields.io/pypi/v/kotresult.svg)](https://pypi.org/project/kotresult/)
 [![image](https://img.shields.io/pypi/l/kotresult.svg)](https://pypi.org/project/kotresult/)
@@ -140,7 +140,10 @@ result = parse_int("not_a_number")
 if result.is_success:
     print(f"Parsed value: {result.get_or_none()}")
 else:
-    print(f"Failed to parse: {result.exception_or_none()}")  # Failed to parse: ValueError("invalid literal for int() with base 10: 'not_a_number'")
+    print(
+        f"Failed to parse: {result.exception_or_none()}"
+    )  # Failed to parse: ValueError("invalid literal for int() with base 10: 'not_a_number'")
+
 
 # You can also chain operations that return Result
 def double_parsed_int(value: str) -> Result[int]:
@@ -156,6 +159,7 @@ print(result.get_or_default(0))  # 42
 result = double_parsed_int("not_a_number")
 print(result.get_or_default(0))  # 0
 
+
 # Using on_success and on_failure for handling results
 def process_result(value: str):
     parse_int(value).on_success(
@@ -163,6 +167,7 @@ def process_result(value: str):
     ).on_failure(
         lambda e: print(f"Failed to parse {value}: {e}")
     )
+
 
 process_result("42")  # Successfully parsed 42 to 42
 process_result("not_a_number")  # Failed to parse not_a_number: invalid literal for int() with base 10: 'not_a_number'
@@ -185,11 +190,13 @@ failure = Result.failure(ValueError("error"))
 mapped = failure.map(lambda x: x * 2)
 print(mapped.is_failure)  # True
 
+
 # mapCatching(): Transform values and catch exceptions
 def risky_transform(x):
     if x > 10:
         raise ValueError("Too large")
     return x * 2
+
 
 result1 = Result.success(5).map_catching(risky_transform)
 print(result1.get_or_none())  # 10
@@ -212,11 +219,13 @@ success = Result.success(42)
 recovered = success.recover(lambda e: 0)
 print(recovered.get_or_none())  # 42
 
+
 # recoverCatching(): Recover with exception handling
 def risky_recovery(e):
     if "critical" in str(e):
         raise RuntimeError("Cannot recover")
     return "Recovered"
+
 
 result1 = Result.failure(ValueError("error")).recover_catching(risky_recovery)
 print(result1.get_or_none())  # "Recovered"
@@ -235,6 +244,7 @@ def handle_result(value: str) -> str:
         on_success=lambda x: f"The number is {x}",
         on_failure=lambda e: f"Invalid input: {e}"
     )
+
 
 print(handle_result("42"))  # "The number is 42"
 print(handle_result("abc"))  # "Invalid input: invalid literal for int() with base 10: 'abc'"
@@ -257,6 +267,7 @@ result = (
 )
 print(result.get_or_none())  # 1.0526315789473684
 
+
 # Complex error handling chain
 def process_data(data: str) -> str:
     return (
@@ -267,19 +278,23 @@ def process_data(data: str) -> str:
         .get_or_else(lambda e: "Processing failed")
     )
 
+
 print(process_data("21"))  # "Result: 42"
 print(process_data("abc"))  # "Result: 0"
 ```
 
 ### run_catching_with Function
 
-The `run_catching_with` function executes a function with a receiver object as the first argument. This is similar to Kotlin's extension function version of runCatching.
+The `run_catching_with` function executes a function with a receiver object as the first argument. This is similar to
+Kotlin's extension function version of runCatching.
 
 **Note**: In Kotlin, there are two versions of `runCatching`:
+
 1. Regular function: `runCatching { ... }`
 2. Extension function: `someObject.runCatching { ... }`
 
-Since Python doesn't have extension functions, we implement the extension function version as a separate function called `run_catching_with`, where the receiver object is explicitly passed as the first parameter.
+Since Python doesn't have extension functions, we implement the extension function version as a separate function called
+`run_catching_with`, where the receiver object is explicitly passed as the first parameter.
 
 ```python
 from kotresult import run_catching_with
@@ -290,9 +305,11 @@ from kotresult import run_catching_with
 result = run_catching_with("hello", str.upper)
 print(result.get_or_null())  # "HELLO"
 
+
 # With a custom function
 def add_prefix(text, prefix):
     return prefix + text
+
 
 result = run_catching_with("world", add_prefix, "Hello, ")
 print(result.get_or_null())  # "Hello, world"
@@ -309,9 +326,11 @@ result = run_catching_with("not a number", int)
 print(result.is_failure)  # True
 print(type(result.exception_or_null()))  # <class 'ValueError'>
 
+
 # Chaining operations with receiver
 def process_text(text):
     return text.strip().lower().replace(" ", "_")
+
 
 result = run_catching_with("  Hello World  ", process_text)
 print(result.get_or_null())  # "hello_world"
@@ -349,7 +368,8 @@ print(result.get_or_null())  # "hello_world"
 - `map_catching(transform)`: Like map(), but catches exceptions thrown by the transform function
 - `recover(transform)`: Transforms the failure exception to a success value, returns a new Result
 - `recover_catching(transform)`: Like recover(), but catches exceptions thrown by the transform function
-- `fold(on_success, on_failure)`: Applies the appropriate function based on success/failure and returns the result directly (not wrapped in Result)
+- `fold(on_success, on_failure)`: Applies the appropriate function based on success/failure and returns the result
+  directly (not wrapped in Result)
 - `get_or_else(on_failure)`: Returns the success value or computes an alternative value from the exception
 
 ### run_catching Function
@@ -358,7 +378,8 @@ print(result.get_or_null())  # "hello_world"
 
 ### run_catching_with Function
 
-- `run_catching_with(receiver, func, *args, **kwargs)`: Executes the function with a receiver object as the first argument and returns a `Result` object
+- `run_catching_with(receiver, func, *args, **kwargs)`: Executes the function with a receiver object as the first
+  argument and returns a `Result` object
 
 ## License
 
