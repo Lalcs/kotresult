@@ -53,6 +53,6 @@ format-jinja = """
     {%- if distance == 0 -%}
         {{ serialize_pep440(base, stage, revision) }}
     {%- else -%}
-        {{ serialize_pep440(bump_version(base), stage, revision, dev=distance, metadata=[commit]) }}
+        {{ timestamp[:4] }}.{{ timestamp[4:6] }}.{{ timestamp[6:8] }}.{{ timestamp[8:] }}
     {%- endif -%}
 """

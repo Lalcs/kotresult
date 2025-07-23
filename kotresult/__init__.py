@@ -1,4 +1,11 @@
-from kotresult.result import Result
-from kotresult.run_catching import run_catching, run_catching_with
+from .result import Result
+from .run_catching import run_catching, run_catching_with
 
-__version__ = '1.0.0'
+__all__ = ['Result', 'run_catching', 'run_catching_with']
+
+# Version will be dynamically set by poetry-dynamic-versioning
+try:
+    from ._version import __version__
+except ImportError:
+    # Fallback for development
+    __version__ = '0.0.0'
